@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import * as Talk from 'talkjs';
-
+import Talk from 'talkjs';
+import './ChatPage.css'
+import { Spin } from 'antd';
 class chat extends Component {
 
   constructor(props) {
@@ -19,7 +20,6 @@ class chat extends Component {
           photoUrl: "https://talkjs.com/docs/img/george.jpg",
           welcomeMessage: "Hey there! How are you? :-)"
         });
-
         if (!window.talkSession) {
           window.talkSession = new Talk.Session({
             appId: "Hku1c4Pt",
@@ -60,7 +60,10 @@ class chat extends Component {
 
   render() {
     return (<span>
-            <div ref={c => this.container = c}>Loading...</div>
+            <div ref={c => this.container = c}>
+              <Spin tip="Loading...">
+              </Spin>
+            </div>
         </span>);
   }
 }
