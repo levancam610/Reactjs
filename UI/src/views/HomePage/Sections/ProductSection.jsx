@@ -1,7 +1,9 @@
 import React from "react";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
-
+import Fade from '@material-ui/core/Fade';
+import Zoom from '@material-ui/core/Zoom';
+import Grow from '@material-ui/core/Grow';
 // @material-ui/icons
 import Chat from "@material-ui/icons/Chat";
 import VerifiedUser from "@material-ui/icons/VerifiedUser";
@@ -18,29 +20,31 @@ class ProductSection extends React.Component {
     const { classes } = this.props;
     return (
       <div className={classes.section}>
+        <Fade in={this.props.open}>
         <GridContainer justify="center">
           <GridItem xs={12} sm={12} md={8}>
-            <h2 className={classes.title}>Let's talk product</h2>
+            <h2 className={classes.title}>Về chúng tôi</h2>
             <h5 className={classes.description}>
-              This is the paragraph where you can write more details about your
-              product. Keep you user engaged by providing meaningful
-              information. Remember that by this time, the user is curious,
-              otherwise he wouldn't scroll to get here. Add a button if you want
-              the user to see more.
+              The .active class needs to be added to one of the slides otherwise the .carousel will not be visible. Also be sure to set a unique id on the .carousel for optional controls, especially if you’re using multiple carousels on a single page.
+              Control and indicator elements must have a data-target attribute (or href for links) that matches the id of the carousel element.
             </h5>
           </GridItem>
         </GridContainer>
+        </Fade>
         <div>
           <GridContainer>
-            <GridItem xs={12} sm={12} md={4}>
-              <InfoArea
-                title="Free Chat"
-                description="Divide details about your product or agency work into parts. Write a few lines about each one. A paragraph describing a feature will be enough."
-                icon={Chat}
-                iconColor="info"
-                vertical
-              />
-            </GridItem>
+            <Zoom in={this.props.open}>
+              <GridItem xs={12} sm={12} md={4}>
+                <InfoArea
+                  title="Free Chat"
+                  description="Divide details about your product or agency work into parts. Write a few lines about each one. A paragraph describing a feature will be enough."
+                  icon={Chat}
+                  iconColor="info"
+                  vertical
+                />
+              </GridItem>
+            </Zoom>
+            <Zoom in={this.props.open} style={{ transitionDelay: "200ms" }}>
             <GridItem xs={12} sm={12} md={4}>
               <InfoArea
                 title="Verified Users"
@@ -50,6 +54,8 @@ class ProductSection extends React.Component {
                 vertical
               />
             </GridItem>
+            </Zoom>
+            <Zoom in={this.props.open} style={{ transitionDelay: "400ms" }}>
             <GridItem xs={12} sm={12} md={4}>
               <InfoArea
                 title="Fingerprint"
@@ -59,6 +65,7 @@ class ProductSection extends React.Component {
                 vertical
               />
             </GridItem>
+            </Zoom>
           </GridContainer>
         </div>
       </div>

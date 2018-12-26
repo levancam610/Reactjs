@@ -18,19 +18,21 @@ class Cards extends React.Component {
   render() {
     const { classes } = this.props;
     return (
-      <Card style={{ width: "20rem" }}>
-        <img
-          style={{ height: "300px", width: "100%", display: "block" }}
-          className={classes.imgCardTop}
-          src={ this.props.url }
-          alt="Card-img-cap"
-        />
-        <CardBody>
-          <h4 className={classes.cardTitle}>Quần Jogger nam</h4>
+        <Card style={{ width: "20rem" }}>
+          <a href="#">
+          <img
+            style={{ height: "300px", width: "100%", display: "block" }}
+            className={classes.imgCardTop}
+            src={ this.props.url }
+            alt="Card-img-cap"
+          />
+          <CardBody>
+            <h4 className={classes.cardTitle}>Quần Jogger nam</h4>
+            <h5>190,000 vnd</h5>
+          </CardBody>
+          </a>
+        </Card>
 
-          <Button color="primary">Xem thêm</Button>
-        </CardBody>
-      </Card>
     );
   }
 }
