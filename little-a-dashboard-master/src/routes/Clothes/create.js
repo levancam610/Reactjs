@@ -1,15 +1,15 @@
 import React from 'react'
 import { connect } from 'dva'
 import classnames from 'classnames'
-import { Row, Col, Card, Icon, Button, Input, Form, Select, AutoComplete, Tooltip, Cascader, Checkbox } from 'antd'
+import { Row, Col, Card, Icon, Button, Input, Form, Select, AutoComplete, Tooltip, Cascader, Checkbox, InputNumber, Radio , Upload, Modal } from 'antd'
 import styles from './profile.less'
-
+import ReactQuill from 'react-quill';
 const imgAvatar = require('../../assets/img/marc.jpg')
 
-const FormItem = Form.Item
-const Option = Select.Option
-const AutoCompleteOption = AutoComplete.Option
-
+const FormItem = Form.Item;
+const Option = Select.Option;
+const AutoCompleteOption = AutoComplete.Option;
+const RadioGroup = Radio.Group;
 const residences = [{
   value: 'zhejiang',
   label: 'Zhejiang',
@@ -33,15 +33,36 @@ const residences = [{
     }]
   }]
 }]
-
+const PriceStyle = {
+  width: "100%"
+};
 class Profile extends React.Component {
   constructor (props, context) {
     super(props, context)
     this.state = {
       confirmDirty: false,
-      autoCompleteResult: []
+      autoCompleteResult: [],
+      previewVisible: false,
+      previewImage: '',
+      fileList: [{
+        uid: '-1',
+        name: 'xxx.png',
+        status: 'done',
+        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+      }],
     }
   }
+
+  handleCancel = () => this.setState({ previewVisible: false })
+
+  handlePreview = (file) => {
+    this.setState({
+      previewImage: file.url || file.thumbUrl,
+      previewVisible: true,
+    });
+  }
+
+  handleChange = ({ fileList }) => this.setState({ fileList })
 
   handleSubmit = (e) => {
     e.preventDefault();
@@ -85,9 +106,15 @@ class Profile extends React.Component {
   }
 
   render () {
-    const { getFieldDecorator } = this.props.form
-    const { autoCompleteResult } = this.state
-
+    const { getFieldDecorator } = this.props.form;
+    const { autoCompleteResult } = this.state;
+    const { previewVisible, previewImage, fileList } = this.state;
+    const uploadButton = (
+      <div>
+        <Icon type="plus" />
+        <div className="ant-upload-text">Upload</div>
+      </div>
+    );
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -122,7 +149,33 @@ class Profile extends React.Component {
     const websiteOptions = autoCompleteResult.map(website => (
       <AutoCompleteOption key={website}>{website}</AutoCompleteOption>
     ))
+    const modules = {
+      toolbar: [
+        ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+        ['blockquote', 'code-block'],
 
+        [{ header: 1 }, { header: 2 }],               // custom button values
+        [{ list: 'ordered'}, { list: 'bullet' }],
+        [{ script: 'sub'}, { script: 'super' }],      // superscript/subscript
+        [{ indent: '-1'}, { indent: '+1' }],          // outdent/indent
+        [{ direction: 'rtl' }],                         // text direction
+
+        [{ size: ['small', false, 'large', 'huge'] }],  // custom dropdown
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+
+        [{ color: [] }, { background: [] }],          // dropdown with defaults from theme
+        [{ font: [] }],
+        [{ align: [] }],
+        ['link', 'image', 'video'],
+        ['clean']                                         // remove formatting button
+      ],
+    };
+    const formats = [
+      'header', 'font', 'size',
+      'bold', 'italic', 'underline', 'strike', 'blockquote',
+      'list', 'bullet', 'indent',
+      'link', 'image', 'video'
+    ];
     return (
       <div>
         <Row className={styles.showcase}>
@@ -136,14 +189,12 @@ class Profile extends React.Component {
               <Form onSubmit={this.handleSubmit}>
                 <FormItem
                   {...formItemLayout}
-                  label='E-mail'
+                  label='Name'
 
                 >
-                  {getFieldDecorator('email', {
+                  {getFieldDecorator('name', {
                     rules: [{
-                      type: 'email', message: 'The input is not valid E-mail!'
-                    }, {
-                      required: true, message: 'Please input your E-mail!'
+                      required: true, message: 'field required not empty'
                     }]
                   })(
                     <Input />
@@ -151,101 +202,80 @@ class Profile extends React.Component {
                 </FormItem>
                 <FormItem
                   {...formItemLayout}
-                  label='Password'
-
+                  label='Category'
                 >
-                  {getFieldDecorator('password', {
+                  {getFieldDecorator('caregoty', {
                     rules: [{
-                      required: true, message: 'Please input your password!'
-                    }, {
-                      validator: this.checkConfirm
+                      required: true, message: 'field required not empty'
                     }]
                   })(
-                    <Input type='password' />
-                  )}
-                </FormItem>
-                <FormItem
-                  {...formItemLayout}
-                  label='Confirm Password'
-
-                >
-                  {getFieldDecorator('confirm', {
-                    rules: [{
-                      required: true, message: 'Please confirm your password!'
-                    }, {
-                      validator: this.checkPassword
-                    }]
-                  })(
-                    <Input type='password' onBlur={this.handleConfirmBlur} />
-                  )}
-                </FormItem>
-                <FormItem
-                  {...formItemLayout}
-                  label={(
-                    <span>
-                      Nickname&nbsp;
-                      <Tooltip title='What do you want other to call you?'>
-                        <Icon type='question-circle-o' />
-                      </Tooltip>
-                    </span>
-                  )}
-
-                >
-                  {getFieldDecorator('nickname', {
-                    rules: [{ required: true, message: 'Please input your nickname!', whitespace: true }]
-                  })(
-                    <Input />
-                  )}
-                </FormItem>
-                <FormItem
-                  {...formItemLayout}
-                  label='Habitual Residence'
-                >
-                  {getFieldDecorator('residence', {
-                    initialValue: ['zhejiang', 'hangzhou', 'xihu'],
-                    rules: [{ type: 'array', required: true, message: 'Please select your habitual residence!' }]
-                  })(
-                    <Cascader options={residences} />
-                  )}
-                </FormItem>
-                <FormItem
-                  {...formItemLayout}
-                  label='Phone Number'
-                >
-                  {getFieldDecorator('phone', {
-                    rules: [{ required: true, message: 'Please input your phone number!' }]
-                  })(
-                    <Input addonBefore={prefixSelector} style={{ width: '100%' }} />
-                  )}
-                </FormItem>
-                <FormItem
-                  {...formItemLayout}
-                  label='Website'
-                >
-                  {getFieldDecorator('website', {
-                    rules: [{ required: true, message: 'Please input website!' }]
-                  })(
-                    <AutoComplete
-                      dataSource={websiteOptions}
-                      onChange={this.handleWebsiteChange}
-                      placeholder='website'
+                    <Select
+                      showSearch
                     >
-                      <Input />
-                    </AutoComplete>
+                      <Option value="jack">Jack</Option>
+                      <Option value="lucy">Lucy</Option>
+                      <Option value="tom">Tom</Option>
+                    </Select>
                   )}
                 </FormItem>
-                <FormItem {...tailFormItemLayout} style={{ marginBottom: 8 }}>
-                  {getFieldDecorator('agreement', {
-                    valuePropName: 'checked'
+                <FormItem
+                  {...formItemLayout}
+                  label='Gender'
+                >
+                  {getFieldDecorator('gender', {
+                    rules: [{
+                      required: true, message: 'Please choose'
+                    }]
                   })(
-                    <Checkbox>I have read the <a href=''>agreement</a></Checkbox>
+                    <RadioGroup>
+                      <Radio active value={1}>Nam</Radio>
+                      <Radio value={2}>Nữ</Radio>
+                    </RadioGroup>
                   )}
                 </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label='Price'
+                >
+                  {getFieldDecorator('price', {
+                    rules: [{
+                      required: true, message: 'field required not empty'
+                    }]
+                  })(
+                    <InputNumber style={PriceStyle} defaultValue={0}/>
+                  )}
+                </FormItem>
+                <FormItem
+                  {...formItemLayout}
+                  label='Amount'
+                >
+                  {getFieldDecorator('amount', {
+                    rules: [{
+                      required: true, message: 'field required not empty'
+                    }]
+                  })(
+                    <InputNumber style={PriceStyle} min={0} max={100} defaultValue={0}/>
+                  )}
+                </FormItem>
+                <div className="clearfix" xs={12}>
+                  <Upload
+                    action="//jsonplaceholder.typicode.com/posts/"
+                    listType="picture-card"
+                    multiple = {true}
+                    onPreview={this.handlePreview}
+                    onChange={this.handleChange}
+                  >
+                    {fileList.length >= 10 ? null : uploadButton}
+                  </Upload>
+                  <Modal visible={previewVisible} footer={null} onCancel={this.handleCancel}>
+                    <img alt="example" style={{ width: '100%' }} src={previewImage} />
+                  </Modal>
+                </div>
                 <FormItem {...tailFormItemLayout}>
-                  <Button type='primary' htmlType='submit'>Update Profile</Button>
+                  <Button type='primary' htmlType='submit'>Create</Button>
                   {' '}
                   <Button type='primary' style={{ marginLeft: 8 }} onClick={this.handleReset}>
-                    Reset
+                    Cancel
                   </Button>
                 </FormItem>
               </Form>

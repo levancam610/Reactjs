@@ -47,6 +47,23 @@ class Menus extends React.Component {
             </Link>
           </Menu.Item>
         </SubMenu>
+        <SubMenu key='category' title={<span><Icon type='bars' /><span>Category</span></span>}>
+          <Menu.Item key='list'>
+            <Link to='/list' style={{color: '#999'}}>
+              Danh sách
+            </Link>
+          </Menu.Item>
+          <Menu.Item key='create'>
+            <Link to='/create' style={{color: '#999'}}>
+              Thêm mới
+            </Link>
+          </Menu.Item>
+        </SubMenu>
+        <Menu.Item key='chat'>
+          <Link to='/chat'>
+            <Icon type='user' />Chat online
+          </Link>
+        </Menu.Item>
         <Menu.Item key='profile'>
           <Link to='/profile'>
             <Icon type='user' />User Profile

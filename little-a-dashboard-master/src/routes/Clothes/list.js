@@ -1,77 +1,117 @@
 import React from 'react';
 import { connect } from 'dva';
-import { Table, Icon, Switch, Radio, Form, Row, Col } from 'antd';
+import { Table, Icon, Switch, Radio, Form, Row, Col, Pagination, Popconfirm, message, Modal } from 'antd';
 import styles from './table.less';
-
-const FormItem = Form.Item;
-
-const columns = [{
-  title: 'Name',
-  dataIndex: 'name',
-  key: 'name',
-  width: 150,
-  render: text => <a href="#">{text}</a>,
-}, {
-  title: 'Age',
-  dataIndex: 'age',
-  key: 'age',
-  width: 70,
-}, {
-  title: 'Address',
-  dataIndex: 'address',
-  key: 'address',
-}, {
-  title: 'Action',
-  key: 'action',
-  width: 200,
-  render: (text, record) => (
-    <span>
-      <a href="#">Edit</a>
-      <span className="ant-divider" />
-      <a href="#">Delete</a>
-      <span className="ant-divider" />
-      <a href="#" className="ant-dropdown-link">
-        More <Icon type="down" />
-      </a>
-    </span>
-  ),
-}];
-
-const data = [];
-for (let i = 1; i <= 10; i++) {
-  data.push({
-    key: i,
-    name: 'John Brown',
-    age: `${i}2`,
-    address: `New York No. ${i} Lake Park`,
-    description: `My name is John Brown, I am ${i}2 years old, living in New York No. ${i} Lake Park.`,
-  });
-}
+import axios from 'axios';
 
 const expandedRowRender = record => <p>{record.description}</p>;
 const title = () => 'Danh sách quần';
+const style ={
+  margin:"20px",
+  "text-align":"right"
+};
 
 class AntdTable extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      List: [],
+      ModalImage: false
+    };
+    this.Delete = this.Delete.bind(this);
 
-  state = {
-    bordered: false,
-    loading: false,
-    pagination: true,
-    size: 'default',
-    title,
-    scroll: undefined,
-
+  }
+  ShowModalImage(bool){
+    this.setState({ModalImage: bool});
+  }
+  Delete(id){
+    console.log(id);
+    message.success('Deleted  ');
+  }
+   cancel(e) {
+    console.log(e);
+    message.error('Cancelled');
   }
   componentDidMount() {
-    // const { dispatch } = this.props;
-    // dispatch({ type: 'table/query' });
+    axios.get(`http://localhost:8000/api/clothes`)
+      .then(res => {
+        this.setState({List: res.data} );
+        console.log(res.data);
+      })
   }
   render() {
-    const state = this.state;
+    const columns = [{
+      title: 'Name',
+      dataIndex: 'Name',
+      key: 'name',
+      width: 250,
+      render: text => <a href="#">{text}</a>,
+    }, {
+      title: 'Category',
+      dataIndex: 'CategoryId',
+      key: 'category',
+      render: rs => {
+        if(rs==1){
+          return "Quần"
+        }
+        else{
+          return "Áo"
+        }
+      }
+    }, {
+      title: 'Gender',
+      dataIndex: 'Gender',
+      key: 'gender',
+    }, {
+      title: 'Amount',
+      dataIndex: 'Amount',
+      key: 'amount',
+    },{
+      title: 'Price',
+      dataIndex: 'Price',
+      key: 'price',
+    },{
+      title: 'Type',
+      dataIndex: 'Type',
+      key: 'type',
+    },{
+      title: 'Action',
+      dataIndex: 'Id',
+      key: 'action',
+      width: 200,
+      render: id => (
+        <span>
+      <a id={id} >Edit</a>
+      <span className="ant-divider" />
+          <Popconfirm title="Are you sure delete?"  onConfirm={() => {this.Delete(id)}} onCancel={this.cancel} okText="Yes" cancelText="No">
+        <a id={id}>Delete</a>
+      </Popconfirm>
+      <span className="ant-divider" />
+      <a id={id} className="ant-dropdown-link" onClick={() => this.ShowModalImage(true)}>
+        Hình
+      </a>
+    </span>
+      ),
+    }];
+
     return (
       <div>
-        <div className={styles['showcase-container']}>
-          <Table {...this.state} columns={columns} dataSource={data} />
+        <div className= { styles['showcase-container']} >
+          <Table  pagination={false} columns={columns} dataSource={this.state.List} />
+          <Pagination style={style} defaultCurrent={1} total={50} />
+          <Modal
+            title="Image"
+            centered
+            visible={this.state.ModalImage}
+            onOk={() => this.ShowModalImage(true)}
+            onCancel={() => this.ShowModalImage(false)}
+            okText = "Ok"
+            cancelText = "Cancel"
+          >
+            <p>some contents...</p>
+            <p>some contents...</p>
+            <p>some contents...</p>
+          </Modal>
         </div>
       </div>
     );

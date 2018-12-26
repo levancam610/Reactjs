@@ -38,6 +38,14 @@ const Routers = function ({ history, app }) {
           }
         },
         {
+          path: 'chat',
+          getComponent (nextState, cb) {
+            require.ensure([], (require) => {
+              cb(null, require('./routes/Clothes/chat.js'))
+            }, 'chat')
+          }
+        },
+        {
           path: 'createClothes',
           getComponent (nextState, cb) {
             require.ensure([], (require) => {

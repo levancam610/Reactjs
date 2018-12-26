@@ -13,9 +13,7 @@ class Dashboard extends React.Component {
   handleChange = (value) => {
     this.setState({ text: value })
   }
-
   render() {
-
     const modules = {
       toolbar: [
         ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
