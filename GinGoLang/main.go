@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./controllers"
+	controller "./controllers"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,8 +10,9 @@ func setupRouter() *gin.Engine {
 
 	client := r.Group("/api")
 	{
-		client.POST("/clothes/create", controllers.Create)
-		client.GET("/clothes", controllers.GetList)
+		client.POST("/clothes/create", controller.CreateClothes)
+		client.GET("/clothes", controller.GetList)
+		client.GET("/category", controller.GetAllCategory)
 		client.POST("/form_post", func(c *gin.Context) {
 			if(c.Request.Method=="POST"){
 				message := c.PostForm("message")
@@ -31,5 +32,5 @@ func setupRouter() *gin.Engine {
 
 func main() {
 	r := setupRouter()
-	r.Run(":8000") // Ứng dụng chạy tại cổng 8080
+	r.Run(":8080") // Ứng dụng chạy tại cổng 8080
 }

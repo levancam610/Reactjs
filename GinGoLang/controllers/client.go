@@ -23,9 +23,9 @@ type Clothes struct {
 	Id int
 	Name string
 	CategoryId int
-	Gender, Description string
-	Amount float32
-	Price float32
+	Gender string
+	Amount int
+	Price int
 }
 
 func FindById(c * gin.Context){
@@ -74,11 +74,11 @@ func GetList(c * gin.Context){
 	post := DTO.QuanDTO{}
 	list := [] DTO.QuanDTO{}
 	for rows.Next(){
-		var id, categoryId, types int
-		var amount, price float32
-		var name, gender, description string
+		var id, categoryId int
+		var amount, price int
+		var name, gender string
 
-		err = rows.Scan(&id, &name, &categoryId, &gender, &amount, &price, &description, &types)
+		err = rows.Scan(&id, &name, &categoryId, &gender, &amount, &price)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -89,23 +89,21 @@ func GetList(c * gin.Context){
 		post.CategoryId = categoryId
 		post.Gender = gender
 		post.Price = price
-		post.Description = description
-		post.Type = types
 		list = append(list,post);
 	}
 
 	c.JSON(200, list)
 	defer db.Close() // Hoãn lại việc close database connect cho đến khi hàm Read() thực hiệc xong
 }
-func Create(c * gin.Context){
+func CreateClothes(c * gin.Context){
 	db := database.DBConn()
 	var json Clothes
 	if err := c.ShouldBindJSON(&json); err == nil {
-		stm, err := db.Prepare("INSERT INTO clothes set name=?, categoryId=?, gender=?, amount=?, price=?, description=?")
+		stm, err := db.Prepare("INSERT INTO clothes SET name=?, categoryId=?, gender=?, amount=?, price=?")
 		if err != nil {
 			panic(err.Error())
 		}
-		stm.Exec(json.Name,json.CategoryId, json.Gender, json.Amount, json.Price, json.Description)
+		stm.Exec(json.Name,json.CategoryId, json.Gender, json.Amount, json.Price)
 		c.JSON(200, gin.H{
 			"messages": "inserted",
 		})
@@ -116,6 +114,34 @@ func Create(c * gin.Context){
 
 	defer db.Close()
 }
+
+/* find category by id */
+func GetAllCategory(c * gin.Context){
+	db := database.DBConn()
+	rows, err := db.Query("SELECT * FROM category")
+	if err != nil{
+		c.JSON(500, gin.H{
+			"messages" : "Story not found",
+		});
+	}
+	post := DTO.CategoryDTO{}
+	list := [] DTO.CategoryDTO{}
+	for rows.Next(){
+		var id, types int
+		var name string
+		err = rows.Scan(&id, &name, &types)
+		if err != nil {
+			panic(err.Error())
+		}
+		post.Id = id
+		post.Name = name
+		post.Type = types
+		list = append(list,post);
+	}
+	c.JSON(200, list)
+	defer db.Close()
+}
+/*----------------------------- */
 func UploadFile(c * gin.Context){
 	file, header , err := c.Request.FormFile("fileUpload")
 	filename := header.Filename
