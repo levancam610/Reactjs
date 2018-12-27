@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Talk from 'talkjs';
-import './ChatPage.css'
 import { Spin } from 'antd';
 class chat extends Component {
 

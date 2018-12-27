@@ -3,7 +3,18 @@ import { connect } from 'dva';
 import { Table, Icon, Switch, Radio, Form, Row, Col, Pagination, Popconfirm, message, Modal } from 'antd';
 import styles from './table.less';
 import axios from 'axios';
-
+import firebase from "firebase";
+const config = {
+  apiKey: "AIzaSyD634xUquHDI7VftKFS_o8gKH8pvsJ3FLI",
+  authDomain: "shopcode-cd861.firebaseapp.com",
+  databaseURL: "https://shopcode-cd861.firebaseio.com",
+  projectId: "shopcode-cd861",
+  storageBucket: "shopcode-cd861.appspot.com",
+  messagingSenderId: "387176100957"
+};
+if (!firebase.apps.length) {
+  firebase.initializeApp(config);
+}
 const expandedRowRender = record => <p>{record.description}</p>;
 const title = () => 'Danh sách quần';
 const style ={
@@ -16,7 +27,8 @@ class AntdTable extends React.Component {
     super(props);
     this.state = {
       List: [],
-      ModalImage: false
+      ModalImage: false,
+      ImageUrl: [],
     };
     this.Delete = this.Delete.bind(this);
 
@@ -26,14 +38,14 @@ class AntdTable extends React.Component {
   }
   Delete(id){
     console.log(id);
-    message.success('Deleted  ');
+    message.success('Xóa thành công');
   }
    cancel(e) {
     console.log(e);
-    message.error('Cancelled');
+    message.error('Đã có lỗi');
   }
   componentDidMount() {
-    axios.get(`http://localhost:8000/api/clothes`)
+    axios.get(`http://localhost:8080/api/clothes`)
       .then(res => {
         this.setState({List: res.data} );
         console.log(res.data);
@@ -111,6 +123,7 @@ class AntdTable extends React.Component {
             <p>some contents...</p>
             <p>some contents...</p>
             <p>some contents...</p>
+            <input type="file"/>
           </Modal>
         </div>
       </div>

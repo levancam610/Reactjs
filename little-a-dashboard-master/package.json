@@ -9,6 +9,7 @@
     "dva": "^1.2.1",
     "dva-loading": "^0.2.1",
     "echarts-for-react": "^1.4.4",
+    "firebase": "^5.7.1",
     "google-map-react": "^0.24.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",

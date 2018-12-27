@@ -1,9 +1,10 @@
 import React from 'react'
 import { connect } from 'dva'
 import classnames from 'classnames'
-import { Row, Col, Card, Icon, Button, Input, Form, Select, AutoComplete, Tooltip, Cascader, Checkbox, InputNumber, Radio , Upload, Modal } from 'antd'
+import { Row, Col, Card, Icon, Button, Input, Form, Select, AutoComplete, Tooltip, Cascader, message, InputNumber, Radio } from 'antd'
 import styles from './profile.less'
 import ReactQuill from 'react-quill';
+import axios from "axios";
 const imgAvatar = require('../../assets/img/marc.jpg')
 
 const FormItem = Form.Item;
@@ -40,42 +41,40 @@ class Profile extends React.Component {
   constructor (props, context) {
     super(props, context)
     this.state = {
-      confirmDirty: false,
-      autoCompleteResult: [],
-      previewVisible: false,
-      previewImage: '',
-      fileList: [{
-        uid: '-1',
-        name: 'xxx.png',
-        status: 'done',
-        url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-      }],
+      category: [],
+      name: "",
+      categoryId: 0,
+      gender : 0,
+      price: 0,
+      amount: 0,
+      image: [],
     }
+    this.onSubmit = this.onSubmit.bind(this);
   }
+  onSubmit(e){
+    e.preventDefault();
+    console.log(e);
 
-  handleCancel = () => this.setState({ previewVisible: false })
-
-  handlePreview = (file) => {
-    this.setState({
-      previewImage: file.url || file.thumbUrl,
-      previewVisible: true,
-    });
   }
-
-  handleChange = ({ fileList }) => this.setState({ fileList })
-
   handleSubmit = (e) => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
+        const url = "http://localhost:8080/api/clothes/create";
+        axios.post( url,JSON.stringify(values) ).then(function(){
+          message.success("Thêm thành công");
+        })
+          .catch(function(){
+            message.error("Đã có lỗi");
+          });
       }
     });
   }
   handleReset = () => {
     this.props.form.resetFields();
   }
-  handleConfirmBlur = (e) => {
+/*  handleConfirmBlur = (e) => {
     const value = e.target.value;
     this.setState({ confirmDirty: this.state.confirmDirty || !!value });
   }
@@ -86,15 +85,15 @@ class Profile extends React.Component {
     } else {
       callback();
     }
-  }
-  checkConfirm = (rule, value, callback) => {
+  }*/
+ /* checkConfirm = (rule, value, callback) => {
     const form = this.props.form;
     if (value && this.state.confirmDirty) {
       form.validateFields(['confirm'], { force: true });
     }
     callback();
-  }
-
+  }*/
+/*
   handleWebsiteChange = (value) => {
     let autoCompleteResult;
     if (!value) {
@@ -104,17 +103,22 @@ class Profile extends React.Component {
     }
     this.setState({ autoCompleteResult });
   }
-
+*/
+  componentDidMount() {
+    axios.get(`http://localhost:8080/api/category`)
+      .then(res => {
+        this.setState({category: res.data} );
+        console.log(res.data);
+      })
+  }
   render () {
     const { getFieldDecorator } = this.props.form;
     const { autoCompleteResult } = this.state;
-    const { previewVisible, previewImage, fileList } = this.state;
-    const uploadButton = (
-      <div>
-        <Icon type="plus" />
-        <div className="ant-upload-text">Upload</div>
-      </div>
-    );
+    var categoryList = this.state.category.map((item, index)=>{
+      return (
+        <Option value={item['Id']}>{item["Name"]}</Option>
+      )
+    });
     const formItemLayout = {
       labelCol: {
         xs: { span: 24 },
@@ -146,9 +150,9 @@ class Profile extends React.Component {
       </Select>
     )
 
-    const websiteOptions = autoCompleteResult.map(website => (
+  /*  const websiteOptions = autoCompleteResult.map(website => (
       <AutoCompleteOption key={website}>{website}</AutoCompleteOption>
-    ))
+    ))*/
     const modules = {
       toolbar: [
         ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
@@ -190,9 +194,8 @@ class Profile extends React.Component {
                 <FormItem
                   {...formItemLayout}
                   label='Name'
-
                 >
-                  {getFieldDecorator('name', {
+                  {getFieldDecorator('Name', {
                     rules: [{
                       required: true, message: 'field required not empty'
                     }]
@@ -204,7 +207,7 @@ class Profile extends React.Component {
                   {...formItemLayout}
                   label='Category'
                 >
-                  {getFieldDecorator('caregoty', {
+                  {getFieldDecorator('CategoryId', {
                     rules: [{
                       required: true, message: 'field required not empty'
                     }]
@@ -212,9 +215,7 @@ class Profile extends React.Component {
                     <Select
                       showSearch
                     >
-                      <Option value="jack">Jack</Option>
-                      <Option value="lucy">Lucy</Option>
-                      <Option value="tom">Tom</Option>
+                      {categoryList}
                     </Select>
                   )}
                 </FormItem>
@@ -222,14 +223,14 @@ class Profile extends React.Component {
                   {...formItemLayout}
                   label='Gender'
                 >
-                  {getFieldDecorator('gender', {
+                  {getFieldDecorator('Gender', {
                     rules: [{
                       required: true, message: 'Please choose'
                     }]
                   })(
-                    <RadioGroup>
-                      <Radio active value={1}>Nam</Radio>
-                      <Radio value={2}>Nữ</Radio>
+                    <RadioGroup value={1}>
+                      <Radio value="Nam">Nam</Radio>
+                      <Radio value="Nữ">Nữ</Radio>
                     </RadioGroup>
                   )}
                 </FormItem>
@@ -237,40 +238,27 @@ class Profile extends React.Component {
                   {...formItemLayout}
                   label='Price'
                 >
-                  {getFieldDecorator('price', {
+                  {getFieldDecorator('Price', {
                     rules: [{
                       required: true, message: 'field required not empty'
                     }]
                   })(
-                    <InputNumber style={PriceStyle} defaultValue={0}/>
+                    <InputNumber style={PriceStyle}/>
                   )}
                 </FormItem>
                 <FormItem
                   {...formItemLayout}
                   label='Amount'
                 >
-                  {getFieldDecorator('amount', {
+                  {getFieldDecorator('Amount', {
                     rules: [{
                       required: true, message: 'field required not empty'
                     }]
                   })(
-                    <InputNumber style={PriceStyle} min={0} max={100} defaultValue={0}/>
+                    <InputNumber style={PriceStyle} min={0} max={100} />
                   )}
                 </FormItem>
-                <div className="clearfix" xs={12}>
-                  <Upload
-                    action="//jsonplaceholder.typicode.com/posts/"
-                    listType="picture-card"
-                    multiple = {true}
-                    onPreview={this.handlePreview}
-                    onChange={this.handleChange}
-                  >
-                    {fileList.length >= 10 ? null : uploadButton}
-                  </Upload>
-                  <Modal visible={previewVisible} footer={null} onCancel={this.handleCancel}>
-                    <img alt="example" style={{ width: '100%' }} src={previewImage} />
-                  </Modal>
-                </div>
+
                 <FormItem {...tailFormItemLayout}>
                   <Button type='primary' htmlType='submit'>Create</Button>
                   {' '}
@@ -279,6 +267,7 @@ class Profile extends React.Component {
                   </Button>
                 </FormItem>
               </Form>
+
             </Card>
           </Col>
           <Col xs={24} sm={24} md={1} lg={1} xl={1} style={{ marginTop: 60 }} />
