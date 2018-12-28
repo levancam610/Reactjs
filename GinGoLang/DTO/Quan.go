@@ -1,4 +1,7 @@
 package DTO
+
+import "time"
+
 type QuanDTO struct {
 	Id int
 	Name string
@@ -6,4 +9,5 @@ type QuanDTO struct {
 	Gender string
 	Amount int
 	Price int
+	Create time.Month
 }

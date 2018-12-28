@@ -8,6 +8,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
+	"strconv"
 )
 
 type Post struct {
@@ -63,8 +65,11 @@ func FindById(c * gin.Context){
 }
 
 func GetList(c * gin.Context){
+	page:= c.Param("page")
+	tmp := strconv.Atoi(page)
+	limit := (strconv.Atoi(page))*12
 	db := database.DBConn()
-	rows, err := db.Query("SELECT * FROM clothes")
+	rows, err := db.Query("SELECT id, name, categoryId, gender, amount, price FROM clothes ORDER BY created desc limit ")
 	if err != nil{
 		c.JSON(500, gin.H{
 			"messages" : "Story not found",
@@ -97,13 +102,14 @@ func GetList(c * gin.Context){
 }
 func CreateClothes(c * gin.Context){
 	db := database.DBConn()
-	var json Clothes
+	var json DTO.QuanDTO
+	toDay := time.Now().Format("02-01-2006")
 	if err := c.ShouldBindJSON(&json); err == nil {
-		stm, err := db.Prepare("INSERT INTO clothes SET name=?, categoryId=?, gender=?, amount=?, price=?")
+		stm, err := db.Prepare("INSERT INTO clothes SET name=?, categoryId=?, gender=?, amount=?, price=?,created=?")
 		if err != nil {
 			panic(err.Error())
 		}
-		stm.Exec(json.Name,json.CategoryId, json.Gender, json.Amount, json.Price)
+		stm.Exec(json.Name,json.CategoryId, json.Gender, json.Amount, json.Price, toDay)
 		c.JSON(200, gin.H{
 			"messages": "inserted",
 		})
@@ -142,6 +148,24 @@ func GetAllCategory(c * gin.Context){
 	defer db.Close()
 }
 /*----------------------------- */
+
+/* Delete clothes*/
+func DeleteClothes(c * gin.Context){
+	db := database.DBConn()
+	id:= c.Param("id")
+	_, err := db.Query("Delete FROM clothes WHERE id = " + id)
+	if err != nil{
+		c.JSON(500, gin.H{
+			"messages" : "Story not found",
+		});
+		panic("error delte clothes")
+	}
+	c.JSON(200, gin.H{
+		"messages": "deleted",
+	})
+	defer db.Close() // Hoãn lại việc close database connect cho đến khi hàm Read() thực hiệc xong*/
+}
+/*---------------------------*/
 func UploadFile(c * gin.Context){
 	file, header , err := c.Request.FormFile("fileUpload")
 	filename := header.Filename

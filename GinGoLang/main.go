@@ -2,35 +2,33 @@ package main
 
 import (
 	controller "./controllers"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func setupRouter() *gin.Engine {
-	r := gin.Default()
-
-	client := r.Group("/api")
+	router := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8000"},
+		AllowMethods:     []string{"POST", "GET"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+	/*	ExposeHeaders:    []string{"Content-Length"},*/
+	}))
+	router.Use(cors.New(config))
+	client := router.Group("/api")
 	{
 		client.POST("/clothes/create", controller.CreateClothes)
 		client.GET("/clothes", controller.GetList)
 		client.GET("/category", controller.GetAllCategory)
-		client.POST("/form_post", func(c *gin.Context) {
-			if(c.Request.Method=="POST"){
-				message := c.PostForm("message")
-				nick := c.DefaultPostForm("nick", "anonymous")
-				c.JSON(200, gin.H{
-					"status":  "posted",
-					"message": message,
-					"nick":    nick,
-				})
-			}
-
-		})
+		client.DELETE("/clothes/delete/:id", controller.DeleteClothes)
 	}
 
-	return r
+	return router
 }
 
 func main() {
-	r := setupRouter()
-	r.Run(":8080") // Ứng dụng chạy tại cổng 8080
+	router := setupRouter()
+	router.Run(":8080") // Ứng dụng chạy tại cổng 8080
 }
