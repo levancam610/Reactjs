@@ -19,7 +19,7 @@ const expandedRowRender = record => <p>{record.description}</p>;
 const title = () => 'Danh sách quần';
 const style ={
   margin:"20px",
-  "text-align":"right"
+  "textAlign":"right"
 };
 
 class AntdTable extends React.Component {
@@ -37,8 +37,20 @@ class AntdTable extends React.Component {
     this.setState({ModalImage: bool});
   }
   Delete(id){
-    console.log(id);
-    message.success('Xóa thành công');
+    var that = this;
+    console.log(this.state.List);
+    axios.delete("http://localhost:8080/api/clothes/delete/"+id)
+      .then(function(response) {
+        message.success('Xóa thành công');
+        that.setState((prevState) => ({
+          List: prevState.List.filter((item) => item["Id"] !== id)
+        }));
+      })
+      .catch(function(error) {
+        console.log(error)
+        message.success('Đã có lỗi');
+      })
+
   }
    cancel(e) {
     console.log(e);
@@ -120,9 +132,6 @@ class AntdTable extends React.Component {
             okText = "Ok"
             cancelText = "Cancel"
           >
-            <p>some contents...</p>
-            <p>some contents...</p>
-            <p>some contents...</p>
             <input type="file"/>
           </Modal>
         </div>

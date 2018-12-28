@@ -1,6 +1,13 @@
 import React, { Component } from 'react';
 import Talk from 'talkjs';
 import { Spin } from 'antd';
+import styles from "./table.less";
+import { css, withStyles } from 'react-with-styles';
+const style = {
+  ".center-stage": {
+    backgroundColor: 'red',
+  },
+};
 class chat extends Component {
 
   constructor(props) {
@@ -58,12 +65,16 @@ class chat extends Component {
   }
 
   render() {
-    return (<span>
-            <div ref={c => this.container = c}>
-              <Spin tip="Loading...">
-              </Spin>
-            </div>
-        </span>);
+    return (
+      <span>
+        <div className= { styles['showcase-container']} >
+          <div ref={c => this.container = c}>
+            <Spin tip="Loading...">
+            </Spin>
+          </div>
+        </div>
+        </span>
+    );
   }
 }
 export default chat;
