@@ -4,6 +4,7 @@ import { Table, Icon, Switch, Radio, Form, Row, Col, Pagination, Popconfirm, mes
 import styles from './table.less';
 import axios from 'axios';
 import firebase from "firebase";
+import FileUploader from 'react-firebase-file-uploader';
 const config = {
   apiKey: "AIzaSyD634xUquHDI7VftKFS_o8gKH8pvsJ3FLI",
   authDomain: "shopcode-cd861.firebaseapp.com",
@@ -26,16 +27,49 @@ class AntdTable extends React.Component {
   constructor(props){
     super(props);
     this.state = {
+      IdClick: 0,
       List: [],
       ModalImage: false,
       ImageUrl: [],
+      progress: 0,
+      isUploading: false
     };
     this.Delete = this.Delete.bind(this);
 
   }
-  ShowModalImage(bool){
+  ShowModalImage(bool, id){
     this.setState({ModalImage: bool});
+    this.setState({IdClick: id})
   }
+  /*----upload image to firebase------ */
+
+  handleUploadStart = () => this.setState({ isUploading: true, progress: 0 });
+  handleProgress = (progress) => this.setState({ progress });
+  handleUploadError = (error) => {
+    this.setState({ isUploading: false });
+    console.error(error);
+  }
+  handleUploadSuccess = (filename) => {
+    let link="";
+    this.setState({ avatar: filename, progress: 100, isUploading: false });
+    firebase.storage().ref('images').child(filename).getDownloadURL().then(url =>
+    {
+      this.setState({ avatarURL: url });
+      var data = {
+        link: url,
+        clothesId: this.state.IdClick
+      }
+      const api = "http://localhost:8080/api/clothes/uploadImage";
+      axios.post( api,JSON.stringify(data)).then(function(){
+        message.success('Tải lên thành công');
+      })
+        .catch(function(){
+          message.error("Đã có lỗi");
+        });
+    });
+
+
+  };
   Delete(id){
     var that = this;
     console.log(this.state.List);
@@ -55,6 +89,9 @@ class AntdTable extends React.Component {
    cancel(e) {
     console.log(e);
     message.error('Đã có lỗi');
+  }
+  getFile(e) {
+    e.target.value = null;
   }
   componentDidMount() {
     axios.get(`http://localhost:8080/api/clothes`)
@@ -111,7 +148,7 @@ class AntdTable extends React.Component {
         <a id={id}>Delete</a>
       </Popconfirm>
       <span className="ant-divider" />
-      <a id={id} className="ant-dropdown-link" onClick={() => this.ShowModalImage(true)}>
+      <a id={id} className="ant-dropdown-link" onClick={() => this.ShowModalImage(true, id)}>
         Hình
       </a>
     </span>
@@ -132,7 +169,21 @@ class AntdTable extends React.Component {
             okText = "Ok"
             cancelText = "Cancel"
           >
-            <input type="file"/>
+            <form >
+            <FileUploader
+              id="myImage"
+              multiple
+              accept="image/*"
+              name="avatar"
+              randomizeFilename
+              storageRef={firebase.storage().ref('images')}
+              onUploadStart={this.handleUploadStart}
+              onUploadError={this.handleUploadError}
+              onUploadSuccess={this.handleUploadSuccess}
+              onProgress={this.handleProgress}
+
+            />
+            </form>
           </Modal>
         </div>
       </div>
