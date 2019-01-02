@@ -23,6 +23,8 @@ func setupRouter() *gin.Engine {
 		client.GET("/clothes", controller.GetList)
 		client.GET("/category", controller.GetAllCategory)
 		client.DELETE("/clothes/delete/:id", controller.DeleteClothes)
+		client.POST("/clothes/uploadImage", controller.UploadImage)
+		client.GET("/clothes/image/:id", controller.GetImageByClothesId)
 	}
 
 	return router

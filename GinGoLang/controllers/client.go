@@ -3,13 +3,8 @@ package controllers
 import (
 	"../DTO"
 	"../database"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"io"
-	"log"
-	"os"
 	"time"
-	"strconv"
 )
 
 type Post struct {
@@ -65,11 +60,12 @@ func FindById(c * gin.Context){
 }
 
 func GetList(c * gin.Context){
-	page:= c.Param("page")
+	/*page:= c.Param("page")
 	tmp := strconv.Atoi(page)
-	limit := (strconv.Atoi(page))*12
+	limit := (strconv.Atoi(page))*12*/
+	/* ORDER BY created desc limit */
 	db := database.DBConn()
-	rows, err := db.Query("SELECT id, name, categoryId, gender, amount, price FROM clothes ORDER BY created desc limit ")
+	rows, err := db.Query("SELECT id, name, categoryId, gender, amount, price FROM clothes")
 	if err != nil{
 		c.JSON(500, gin.H{
 			"messages" : "Story not found",
@@ -166,17 +162,47 @@ func DeleteClothes(c * gin.Context){
 	defer db.Close() // Hoãn lại việc close database connect cho đến khi hàm Read() thực hiệc xong*/
 }
 /*---------------------------*/
-func UploadFile(c * gin.Context){
-	file, header , err := c.Request.FormFile("fileUpload")
-	filename := header.Filename
-	fmt.Println(header.Filename)
-	out, err := os.Create("./images/"+filename+".png")
-	if err != nil {
-		log.Fatal(err)
+func UploadImage(c * gin.Context){
+	db := database.DBConn()
+	var json DTO.ImageDTO
+	if err := c.ShouldBindJSON(&json); err == nil {
+		stm, err := db.Prepare("INSERT INTO images SET link=?, clothesId=?")
+		if err != nil {
+			panic(err.Error())
+		}
+		stm.Exec(json.Link,json.ClothesId)
+		c.JSON(200, gin.H{
+			"messages": "inserted",
+		})
+
+	} else {
+		c.JSON(500, gin.H{"error": err.Error()})
 	}
-	_, err = io.Copy(out, file)
-	if err != nil {
-		log.Fatal(err)
+	defer db.Close()
+}
+
+/* Load image from clothes*/
+func GetImageByClothesId(c * gin.Context){
+	db := database.DBConn()
+	rows, err := db.Query("SELECT link, clothesId FROM images where clothesId = "+c.Param("id"))
+	if err != nil{
+		c.JSON(500, gin.H{
+			"messages" : "Story not found",
+		});
 	}
-	defer out.Close()
+	post := DTO.ImageDTO{}
+	list := [] DTO.ImageDTO{}
+	for rows.Next(){
+		var clothesId int
+		var link string
+		err = rows.Scan(&link, &clothesId)
+		if err != nil {
+			panic(err.Error())
+		}
+		post.ClothesId = clothesId
+		post.Link = link
+		list = append(list,post)
+	}
+	c.JSON(200, list)
+	defer db.Close()
 }
