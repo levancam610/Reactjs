@@ -4,6 +4,7 @@ import (
 	"../DTO"
 	"../database"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"time"
 )
 
@@ -60,12 +61,15 @@ func FindById(c * gin.Context){
 }
 
 func GetList(c * gin.Context){
-	/*page:= c.Param("page")
-	tmp := strconv.Atoi(page)
-	limit := (strconv.Atoi(page))*12*/
+	page:= c.Param("page")
+	tmp,err := strconv.Atoi(page)
+	if(err!=nil){
+		panic("loi page ko convert dc integer")
+	}
+	from := strconv.Itoa(tmp*12)
 	/* ORDER BY created desc limit */
 	db := database.DBConn()
-	rows, err := db.Query("SELECT id, name, categoryId, gender, amount, price FROM clothes")
+	rows, err := db.Query("SELECT id, name, categoryId, gender, amount, price FROM clothes ORDER BY created desc limit "+from+",12")
 	if err != nil{
 		c.JSON(500, gin.H{
 			"messages" : "Story not found",
@@ -184,7 +188,7 @@ func UploadImage(c * gin.Context){
 /* Load image from clothes*/
 func GetImageByClothesId(c * gin.Context){
 	db := database.DBConn()
-	rows, err := db.Query("SELECT link, clothesId FROM images where clothesId = "+c.Param("id"))
+	rows, err := db.Query("SELECT * FROM images where clothesId = "+c.Param("id"))
 	if err != nil{
 		c.JSON(500, gin.H{
 			"messages" : "Story not found",
@@ -193,12 +197,13 @@ func GetImageByClothesId(c * gin.Context){
 	post := DTO.ImageDTO{}
 	list := [] DTO.ImageDTO{}
 	for rows.Next(){
-		var clothesId int
+		var id, clothesId int
 		var link string
-		err = rows.Scan(&link, &clothesId)
+		err = rows.Scan(&id, &link, &clothesId)
 		if err != nil {
 			panic(err.Error())
 		}
+		post.Id = id
 		post.ClothesId = clothesId
 		post.Link = link
 		list = append(list,post)
@@ -206,3 +211,47 @@ func GetImageByClothesId(c * gin.Context){
 	c.JSON(200, list)
 	defer db.Close()
 }
+/*--------------------------*/
+
+/*--------delete image from clothes list--------------------*/
+func DeleteImage(c * gin.Context){
+	db := database.DBConn()
+	id:= c.Param("id")
+	_, err := db.Query("Delete FROM images WHERE id = " + id)
+	if err != nil{
+		c.JSON(500, gin.H{
+			"messages" : "Story not found",
+		});
+		panic("error delte clothes")
+	}
+	c.JSON(200, gin.H{
+		"messages": "deleted",
+	})
+	defer db.Close()
+}
+/*----------------------------*/
+/*-------- count page for list clothes --------*/
+
+/* Delete clothes*/
+func CountPageClothes(c * gin.Context){
+	db := database.DBConn()
+	rows, err := db.Query("Select count(*) FROM clothes")
+	if err != nil{
+		c.JSON(500, gin.H{
+			"messages" : "Story not found",
+		});
+		panic(err)
+	}
+	var rs int
+	for rows.Next() {
+		err = rows.Scan(&rs)
+	}
+	if rs%12==0 {
+		rs = rs/12
+	} else{
+		rs = rs/12 +1
+	}
+	c.JSON(200, rs)
+	defer db.Close() // Hoãn lại việc close database connect cho đến khi hàm Read() thực hiệc xong*/
+}
+/*------------------------------ */

@@ -20,11 +20,13 @@ func setupRouter() *gin.Engine {
 	client := router.Group("/api")
 	{
 		client.POST("/clothes/create", controller.CreateClothes)
-		client.GET("/clothes", controller.GetList)
+		client.GET("/clothesList/:page", controller.GetList)
 		client.GET("/category", controller.GetAllCategory)
 		client.DELETE("/clothes/delete/:id", controller.DeleteClothes)
 		client.POST("/clothes/uploadImage", controller.UploadImage)
 		client.GET("/clothes/image/:id", controller.GetImageByClothesId)
+		client.DELETE("/clothes/image/delete/:id", controller.DeleteClothes)
+		client.GET("/clothes/countPage", controller.CountPageClothes)
 	}
 
 	return router
