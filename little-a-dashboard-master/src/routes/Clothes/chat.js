@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Talk from 'talkjs';
 import { Spin } from 'antd';
 import styles from "./table.less";
-import { css, withStyles } from 'react-with-styles';
 const style = {
   ".center-stage": {
     backgroundColor: 'red',
@@ -68,7 +67,7 @@ class chat extends Component {
     return (
       <span>
         <div className= { styles['showcase-container']} >
-          <div ref={c => this.container = c}>
+          <div className="hihi" ref={c => this.container = c}>
             <Spin tip="Loading...">
             </Spin>
           </div>

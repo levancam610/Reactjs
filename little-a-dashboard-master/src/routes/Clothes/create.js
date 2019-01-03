@@ -243,7 +243,12 @@ class Profile extends React.Component {
                       required: true, message: 'field required not empty'
                     }]
                   })(
-                    <InputNumber style={PriceStyle}/>
+                    <InputNumber
+                      style={PriceStyle}
+                      defaultValue={0}
+                      formatter={value => ` ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                      parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                    />
                   )}
                 </FormItem>
                 <FormItem
