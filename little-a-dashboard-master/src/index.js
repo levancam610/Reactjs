@@ -4,13 +4,16 @@ import dva from 'dva'
 import createLoading from 'dva-loading'
 import { hashHistory } from 'dva/router'
 import { message } from 'antd'
-
+import createHistory from 'history/lib/createHashHistory'
+let history2 = createHistory({
+  queryKey: false,
+})
 // 1. Initialize
 const app = dva({
   ...createLoading({
     effects: true
   }),
-  history: hashHistory,
+  history: history2,
   onError (error) {
     message.error(error.message)
   }

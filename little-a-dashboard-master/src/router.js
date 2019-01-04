@@ -1,15 +1,15 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Router } from 'dva/router'
+import createBrowserHistory from 'history/lib/createBrowserHistory'
 import App from './routes/app'
-
 const registerModel = (app, model) => {
   if (!(app._models.filter(m => m.namespace === model.namespace).length === 1)) {
     app.model(model)
   }
 }
 
-const Routers = function ({ history, app }) {
+const Routers = function ({ app }) {
   const routes = [
     {
       path: '/',
@@ -168,11 +168,10 @@ const Routers = function ({ history, app }) {
     }
   ]
 
-  return <Router history={history} routes={routes} />
+  return <Router history={createBrowserHistory()} routes={routes} />
 }
 
 Routers.propTypes = {
-  history: PropTypes.object,
   app: PropTypes.object
 }
 

@@ -26,7 +26,7 @@ class Menus extends React.Component {
     return (
       <Menu mode={sidebarFold ? 'vertical' : 'inline'} theme='light' onClick={onMenuClick} selectedKeys={Array.of(menukey)}>
         <Menu.Item key='dashboard'>
-          <Link to='/dashboard'>
+          <Link to='/'>
             <Icon type='appstore-o' />Dashboard
           </Link>
         </Menu.Item>
