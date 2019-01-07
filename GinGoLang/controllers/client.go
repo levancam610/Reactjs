@@ -4,8 +4,12 @@ import (
 	"../DTO"
 	"../database"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"strconv"
+	"strings"
 	"time"
+	"github.com/gin-contrib/sessions"
+
 )
 
 type Post struct {
@@ -255,3 +259,46 @@ func CountPageClothes(c * gin.Context){
 	defer db.Close() // Hoãn lại việc close database connect cho đến khi hàm Read() thực hiệc xong*/
 }
 /*------------------------------ */
+/* ----------- Login ---------------*/
+func Login(c *gin.Context) {
+	session := sessions.Default(c)
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	var user, pass string
+	if strings.Trim(username, " ") == "" || strings.Trim(password, " ") == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Parameters can't be empty"})
+		return
+	}
+	db := database.DBConn()
+	err := db.QueryRow("SELECT username, password FROM users WHERE username=?", username).Scan(&user, &pass)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Username no valid"})
+		return
+	}
+	if strings.Trim(pass, " ") == strings.Trim(password, " "){
+		session.Set("user", username) //In real world usage you'd set this to the users ID
+		session.Save()
+		c.JSON(http.StatusOK, gin.H{"status": "OK"}) //Successfully authenticated user
+		return
+	}else{
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password wrong"})
+	}
+}
+
+func GetSession(c *gin.Context) {
+	session := sessions.Default(c)
+	if session.Get("user")!=nil{
+		c.JSON(http.StatusOK, session.Get("user"))
+	}
+}
+
+func Logout(c *gin.Context) {
+	session := sessions.Default(c)
+	if session.Get("user")!=nil{
+		session.Delete("user")
+		session.Save()
+		c.JSON(http.StatusOK, gin.H{"status":"OK"})
+	}
+}
+
+/* ----------------------------------*/
