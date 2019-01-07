@@ -4,6 +4,7 @@ import ProfilePage from "views/ProfilePage/ProfilePage.jsx";
 import LoginPage from "views/LoginPage/LoginPage.jsx";
 import HomePage from "views/HomePage/HomePage.jsx";
 import Jogger from "views/ClothesPage/Jogger.jsx";
+import Detail from "views/ClothesPage/Detail.jsx";
 
 var indexRoutes = [
   { path: "/landing-page", name: "LandingPage", component: LandingPage },
@@ -11,7 +12,8 @@ var indexRoutes = [
   { path: "/login-page", name: "LoginPage", component: LoginPage },
   { path: "/a", name: "Components", component: Components },
   { path: "/Home", name: "HomePage", component: HomePage },
-  { path: "/Jogger", name: "JoggerPage", component: Jogger }
+  { path: "/Jogger", name: "JoggerPage", component: Jogger },
+  { path: "/DetailClothes", name: "DetailClothes", component: Detail }
 ];
 
 export default indexRoutes;

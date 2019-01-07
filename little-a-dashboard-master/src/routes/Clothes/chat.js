@@ -19,7 +19,7 @@ class chat extends Component {
     Talk.ready
       .then(() => {
         const me = new Talk.User({
-          id: "12345231",
+          id: "1",
           name: "George Looney",
           email: "george@looney.net",
           photoUrl: "https://talkjs.com/docs/img/george.jpg",
@@ -27,13 +27,13 @@ class chat extends Component {
         });
         if (!window.talkSession) {
           window.talkSession = new Talk.Session({
-            appId: "Hku1c4Pt",
+            appId: "txr0iz3l",
             me: me
           });
         }
 
         const other = new Talk.User({
-          id: "54321",
+          id: "2",
           name: "Ronald Raygun",
           email: "ronald@teflon.com",
           photoUrl: "https://talkjs.com/docs/img/ronald.jpg",

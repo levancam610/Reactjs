@@ -5,7 +5,8 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import Icon from "@material-ui/core/Icon";
 // @material-ui/icons
 import Email from "@material-ui/icons/Email";
-import People from "@material-ui/icons/People";
+
+import axios from "axios";
 // core components
 import Header from "components/Header/Header.jsx";
 import HeaderLinks from "components/Header/HeaderLinks.jsx";
@@ -28,8 +29,13 @@ class LoginPage extends React.Component {
     super(props);
     // we use this to make the card to appear after the page has been rendered
     this.state = {
-      cardAnimaton: "cardHidden"
+      cardAnimaton: "cardHidden",
+      name: "",
+      userName: "",
+      passWord: ""
     };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
   componentDidMount() {
     // we add a hidden class to the card and after 700 ms we delete it and the transition appears
@@ -39,6 +45,35 @@ class LoginPage extends React.Component {
       }.bind(this),
       700
     );
+  }
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+  handleSubmit(event) {
+    event.preventDefault();
+    console.log(this.state.userName);
+    console.log(this.state.passWord);
+    let bodyFormData = new FormData();
+    bodyFormData.set("username", this.state.userName);
+    bodyFormData.set("password", this.state.passWord);
+    axios({
+      method: "post",
+      url: "http://localhost:8080/api/login",
+      data: bodyFormData,
+      config: { headers: { "Content-Type": "multipart/form-data" } }
+    })
+      .then(function(response) {
+        //handle success
+        if(response["status"]==200){
+          console.log("dang nhap thanh cong cmnr")
+          window.location.href = "http://localhost:8000";
+        }
+        console.log(response["status"]);
+      })
+      .catch(function(response) {
+        //handle error
+        console.log(response);
+      });
   }
   render() {
     const { classes, ...rest } = this.props;
@@ -63,7 +98,7 @@ class LoginPage extends React.Component {
             <GridContainer justify="center">
               <GridItem xs={12} sm={12} md={4}>
                 <Card className={classes[this.state.cardAnimaton]}>
-                  <form className={classes.form}>
+                  <form className={classes.form} onSubmit={this.handleSubmit}>
                     <CardHeader color="primary" className={classes.cardHeader}>
                       <h4>Login</h4>
                       <div className={classes.socialLine}>
@@ -96,31 +131,18 @@ class LoginPage extends React.Component {
                         </Button>
                       </div>
                     </CardHeader>
-                    <p className={classes.divider}>Or Be Classical</p>
+                    <p className={classes.divider}>hihi</p>
                     <CardBody>
                       <CustomInput
-                        labelText="First Name..."
-                        id="first"
+                        labelText="Username"
+                        id="userName"
                         formControlProps={{
                           fullWidth: true
                         }}
                         inputProps={{
                           type: "text",
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <People className={classes.inputIconsColor} />
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                      <CustomInput
-                        labelText="Email..."
-                        id="email"
-                        formControlProps={{
-                          fullWidth: true
-                        }}
-                        inputProps={{
-                          type: "email",
+                          name: "userName",
+                          onChange: this.handleChange,
                           endAdornment: (
                             <InputAdornment position="end">
                               <Email className={classes.inputIconsColor} />
@@ -136,6 +158,8 @@ class LoginPage extends React.Component {
                         }}
                         inputProps={{
                           type: "password",
+                          name: "passWord",
+                          onChange: this.handleChange,
                           endAdornment: (
                             <InputAdornment position="end">
                               <Icon className={classes.inputIconsColor}>
@@ -147,8 +171,8 @@ class LoginPage extends React.Component {
                       />
                     </CardBody>
                     <CardFooter className={classes.cardFooter}>
-                      <Button simple color="primary" size="lg">
-                        Get started
+                      <Button type="submit" simple color="primary" size="lg">
+                        Login
                       </Button>
                     </CardFooter>
                   </form>
